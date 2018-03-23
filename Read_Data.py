@@ -56,10 +56,10 @@ def Initialize_Data(dir):
                             Labels[l - data_info_lines - 1][0] = 1
                             Num_positive += 1
 
-    print("Number of Positive: ", Num_positive)
+#    print("Number of Positive: ", Num_positive)
     global Positive_Feature
     Positive_Feature = np.ones((Num_positive, Num_Features))
-    print("Num of Negative: ", Num_negative)
+#    print("Num of Negative: ", Num_negative)
     global Negative_Feature
     Negative_Feature = np.ones((Num_negative, Num_Features))
     index_positive = 0
@@ -72,6 +72,8 @@ def Initialize_Data(dir):
         else:
             Negative_Feature[index_negative] = Features[i]
             index_negative += 1
+
+    print("Read Completed")
 
 def get_feature():
     return Features
