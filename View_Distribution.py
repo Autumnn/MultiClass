@@ -4,7 +4,7 @@ import numpy as np
 import Read_Data as RD
 
 #dir = "wine-5-fold/wine-5-1tra.dat"
-dir = "page-blocks0.dat"
+dir = "segment0.dat"
 
 RD.Initialize_Data(dir)
 
