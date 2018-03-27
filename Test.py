@@ -11,7 +11,8 @@ dir = "page-blocks0.dat"
 RD.Initialize_Data(dir)
 
 print('Generate Fake Samples')
-Fake_sample = gan.sample_data(RD.get_positive_feature())
+Feature_samples = RD.get_positive_feature()
+Fake_sample = gan.sample_data(Feature_samples)
 
 print(Fake_sample[1,:])
 

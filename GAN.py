@@ -52,7 +52,9 @@ def make_gan(GAN_in, G, D):
 def sample_data(samples):
     Number_of_Feature = samples.shape[1]
 #    Number_of_Samples = samples.shape[0]
-    Fake_Sample = np.random.rand(samples.shape)
+    size = list(samples.shape)
+    print(size)
+    Fake_Sample = np.random.rand(size[0],size[1])
     for i in range(Number_of_Feature):
         Min = min(samples[:,i])
         Dis = max(samples[:,i]) - Min
