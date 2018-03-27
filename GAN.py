@@ -61,18 +61,19 @@ def sample_data(samples):
         Fake_Sample[:,i] = Fake_Sample[:,i] * Dis + Min
     return Fake_Sample
 
-def sample_data_and_gen(G, noise_dim=10, n_samples=10000):
-    XT = sample_data(n_samples=n_samples)
-    XN_noise = np.random.uniform(0, 1, size=[n_samples, noise_dim])
+def sample_data_and_gen(G, samples, noise_dim = 6):
+    XT = sample_data(samples)
+    size = list(samples.shape)
+    XN_noise = np.random.uniform(0, 1, size=[size[0], noise_dim])
     XN = G.predict(XN_noise)
     X = np.concatenate((XT, XN))
-    y = np.zeros((2*n_samples, 2))
-    y[:n_samples, 1] = 1
-    y[n_samples:, 0] = 1
+    y = np.zeros((2*size[0], 2))
+    y[:size[0], 0] = 1
+    y[size[0]:, 1] = 1
     return X, y
 
-def pretrain(G, D, noise_dim=10, n_samples=10000, batch_size=32):
-    X, y = sample_data_and_gen(G, n_samples=n_samples, noise_dim=noise_dim)
+def pretrain(G, D, samples, noise_dim = 6, batch_size=32):
+    X, y = sample_data_and_gen(G, samples, noise_dim=noise_dim)
     set_trainability(D, True)
     D.fit(X, y, epochs=1, batch_size=batch_size)
 
