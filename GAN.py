@@ -49,32 +49,40 @@ def make_gan(GAN_in, G, D):
 #GAN, GAN_out = make_gan(GAN_in, G, D)
 #GAN.summary()
 
-def sample_data(samples):
+def sample_data(samples):   # ACtually no use, just for test --> it can generate random fake samples
     Number_of_Feature = samples.shape[1]
 #    Number_of_Samples = samples.shape[0]
     size = list(samples.shape)
-    print(size)
+#    print(size)
     Fake_Sample = np.random.rand(size[0],size[1])
     for i in range(Number_of_Feature):
         Min = min(samples[:,i])
         Dis = max(samples[:,i]) - Min
+        print("i=", i, " Min=", Min, " Dis", Dis)
         Fake_Sample[:,i] = Fake_Sample[:,i] * Dis + Min
     return Fake_Sample
 
 def sample_data_and_gen(G, samples, noise_dim = 6):
-    XT = sample_data(samples)
+    #XT = sample_data(samples)
+    XT = samples
     size = list(samples.shape)
     XN_noise = np.random.uniform(0, 1, size=[size[0], noise_dim])
+    print("XN_noise:")
+    print(XN_noise[0])
+    print(XN_noise[-1])
     XN = G.predict(XN_noise)
+    print("XN:")
+    print(XN[0])
+    print(XN[-1])
     X = np.concatenate((XT, XN))
     y = np.zeros((2*size[0], 2))
     y[:size[0], 0] = 1
     y[size[0]:, 1] = 1
     return X, y
 
-def pretrain(G, D, samples, noise_dim = 6, batch_size=32):
+def pretrain(G, D, samples, noise_dim = 6, batch_size=64):
     X, y = sample_data_and_gen(G, samples, noise_dim=noise_dim)
     set_trainability(D, True)
-    D.fit(X, y, epochs=1, batch_size=batch_size)
+    D.fit(X, y, epochs=10, batch_size=batch_size)
 
 #pretrain(G, D)

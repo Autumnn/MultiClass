@@ -27,7 +27,9 @@ def Initialize_Data(dir):
     global Labels
     Labels = np.ones((Num_Samples, 1))
 
+    global Num_positive
     Num_positive = 0
+    global Num_negative
     Num_negative = 0
 
     with open(dir, "r") as data_file:
