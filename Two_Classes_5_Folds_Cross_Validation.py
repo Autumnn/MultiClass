@@ -5,8 +5,8 @@ from sklearn import svm
 
 G_Mean = np.array([0.0,0.0,0.0,0.0,0.0])
 for j in range(5):
-    dir_train = "glass1-5-fold/glass1-5-" + str(j+1) + "tra.dat"
-    dir_test = "glass1-5-fold/glass1-5-" + str(j+1) + "tst.dat"
+    dir_train = "page-blocks0-5-fold/page-blocks0-5-" + str(j+1) + "tra.dat"
+    dir_test = "page-blocks0-5-fold/page-blocks0-5-" + str(j+1) + "tst.dat"
     #dir_train = "glass1/result" + str(j) + "s0.tra"
     #dir_test = "glass1/result" + str(j) + "s0.tst"
 
@@ -45,7 +45,7 @@ for j in range(5):
     Labels = Labels.ravel()
     #print(Labels)
 
-    clf = svm.SVC()
+    clf = svm.SVC(C=1, kernel='rbf', gamma= 0.2)
     clf.fit(Features, Labels)
 
     #SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,decision_function_shape='ovr',degree=3,

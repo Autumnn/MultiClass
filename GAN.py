@@ -2,6 +2,8 @@ from keras import optimizers
 from keras.layers import Input, Dense, Activation
 from keras.models import Sequential, Model
 from keras.optimizers import Adam, SGD
+from tqdm import tqdm_notebook as tqdm
+from ipywidgets import IntProgress
 import numpy as np
 
 def get_generative(G_in, dense_dim=200, out_dim=10, lr=1e-3):
@@ -10,7 +12,8 @@ def get_generative(G_in, dense_dim=200, out_dim=10, lr=1e-3):
     G_out = Dense(out_dim, activation='tanh')(x)
     G = Model(G_in, G_out)
     opt = SGD(lr=lr)
-    G.compile(loss='binary_crossentropy', optimizer=opt)
+#    G.compile(loss='binary_crossentropy', optimizer=opt)
+    G.compile(loss='mean_squared_error', optimizer=opt)
     return G, G_out
 
 #G_in = Input(shape=[6])
@@ -41,9 +44,8 @@ def make_gan(GAN_in, G, D):
     x = G(GAN_in)
     GAN_out = D(x)
     GAN = Model(GAN_in, GAN_out)
-    GAN.compile(loss='binary_crossentropy', optimizer=G.optimizer)
+    GAN.compile(loss='mean_squared_error', optimizer=G.optimizer)
     return GAN, GAN_out
-
 
 #GAN_in = Input([10])
 #GAN, GAN_out = make_gan(GAN_in, G, D)
@@ -67,22 +69,46 @@ def sample_data_and_gen(G, samples, noise_dim = 6):
     XT = samples
     size = list(samples.shape)
     XN_noise = np.random.uniform(0, 1, size=[size[0], noise_dim])
-    print("XN_noise:")
-    print(XN_noise[0])
-    print(XN_noise[-1])
+    #print("XN_noise:")
+    #print(XN_noise[0])
+    #print(XN_noise[-1])
     XN = G.predict(XN_noise)
-    print("XN:")
-    print(XN[0])
-    print(XN[-1])
+    #print("XN:")
+    #print(XN[0])
+    #print(XN[-1])
     X = np.concatenate((XT, XN))
     y = np.zeros((2*size[0], 2))
     y[:size[0], 0] = 1
-    y[size[0]:, 1] = 1
+    y[size[0]:, 1] = 0
     return X, y
 
 def pretrain(G, D, samples, noise_dim = 6, batch_size=64):
     X, y = sample_data_and_gen(G, samples, noise_dim=noise_dim)
     set_trainability(D, True)
-    D.fit(X, y, epochs=10, batch_size=batch_size)
+    D.fit(X, y, epochs=100, batch_size=batch_size)
 
-#pretrain(G, D)
+def sample_noise(G, samples, noise_dim=6):
+    size = list(samples.shape)
+    X = np.random.uniform(0, 1, size=[size[0], noise_dim])
+    y = np.zeros((size[0], 2))
+    y[:, 1] = 1
+    return X, y
+
+
+def train(GAN, G, D, samples, epochs=500, noise_dim=6, batch_size=64, verbose=False, v_freq=50):
+    d_loss = []
+    g_loss = []
+    e_range = range(epochs)
+    if verbose:
+        e_range = tqdm(e_range)
+    for epoch in e_range:
+        X, y = sample_data_and_gen(G, samples, noise_dim=noise_dim)
+        set_trainability(D, True)
+        d_loss.append(D.train_on_batch(X, y))
+
+        X, y = sample_noise(G, samples, noise_dim=noise_dim)
+        set_trainability(D, False)
+        g_loss.append(GAN.train_on_batch(X, y))
+        if verbose and (epoch + 1) % v_freq == 0:
+            print("Epoch #{}: Generative Loss: {}, Discriminative Loss: {}".format(epoch + 1, g_loss[-1], d_loss[-1]))
+    return d_loss, g_loss
