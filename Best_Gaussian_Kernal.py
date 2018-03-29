@@ -5,7 +5,7 @@ import Read_Data as RD
 from matplotlib import pyplot as plt
 
 Num_Cross_Folders = 5
-Gamma = np.arange(0.15, 0.25, 0.05)
+Gamma = np.arange(0.2, 0.25, 0.05)
 G_Mean = np.linspace(0, 0, len(Gamma))
 Sensitivity = np.linspace(0, 0, len(Gamma))
 Specificity = np.linspace(0, 0, len(Gamma))

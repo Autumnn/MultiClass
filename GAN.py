@@ -78,8 +78,8 @@ def sample_data_and_gen(G, samples, noise_dim = 6):
     #print(XN[-1])
     X = np.concatenate((XT, XN))
     y = np.zeros((2*size[0], 2))
-    y[:size[0], 0] = 1
-    y[size[0]:, 1] = 0
+    y[:size[0], 1] = 1
+    y[size[0]:, 0] = 1
     return X, y
 
 def pretrain(G, D, samples, noise_dim = 6, batch_size=64):
