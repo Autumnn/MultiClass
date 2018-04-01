@@ -4,11 +4,11 @@ from mpl_toolkits.mplot3d import Axes3D
 import Read_Data as RD
 
 #dir = "wine-5-fold/wine-5-1tra.dat"
-dir = "page-blocks0.dat"
+dir = "segment0.dat"
 
 RD.Initialize_Data(dir)
 
-for i in range(0, RD.Num_Features):
+for i in range(14, RD.Num_Features):
     for j in range(i+1, RD.Num_Features):
         for k in range(j+1, RD.Num_Features):
             print(i, j ,k)
