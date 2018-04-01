@@ -54,11 +54,11 @@ d_loss, g_loss = gan.train(GAN, G, D, Feature_samples, noise_dim=2, verbose=True
 Noise_Input = np.random.uniform(0, 1, size=[sampleNo, 2])
 Sudo_Samples = G.predict(Noise_Input)
 
-plt.subplot(2,1,1)
+plt.subplot(1,2,1)
 #plt.scatter(Noise_Input[:,0],Noise_Input[:,1],marker = 'o', color = '#539caf', label='1', s = 3, alpha=0.3)
 plt.scatter(Feature_samples[:,0], Feature_samples[:,1],marker = 'o', color = '#539caf', label='1', s = 3, alpha=0.3)
 
-plt.subplot(2,1,2)
+plt.subplot(1,2,2)
 plt.scatter(Sudo_Samples[:,0], Sudo_Samples[:,1], marker = '+', color = 'r', label='2', s = 10)
 
 plt.show()
