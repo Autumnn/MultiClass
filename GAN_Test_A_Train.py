@@ -28,14 +28,14 @@ min_max_scaler.fit(all_set)
 o_trans = min_max_scaler.transform(o)
 s_trans = min_max_scaler.transform(s_minority)
 
-input_dim = 1
+input_dim = 2
 
 print('Generate Fake Samples')
 Feature_samples = s_trans
 print(Feature_samples[0])
 print(Feature_samples[-1])
 
-G_dense = 100
+G_dense = 200
 D_dense = 200
 print('Generate Models')
 G_in = Input(shape=[input_dim])

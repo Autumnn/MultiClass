@@ -6,7 +6,7 @@ from tqdm import tqdm_notebook as tqdm
 from ipywidgets import IntProgress
 import numpy as np
 
-def get_generative(G_in, dense_dim=300, out_dim=10, lr=1e-3):
+def get_generative(G_in, C_in, dense_dim=300, out_dim=10, lr=1e-3):
     x = Dense(dense_dim)(G_in)
     x = Activation('tanh')(x)
     G_out = Dense(out_dim, activation='tanh')(x)
@@ -20,7 +20,7 @@ def get_generative(G_in, dense_dim=300, out_dim=10, lr=1e-3):
 #G, G_out = get_generative(G_in)
 #G.summary()
 
-def get_discriminative(D_in, dense_dim = 200, lr=1e-3):
+def get_discriminative(D_in, C_in, dense_dim = 200, lr=1e-3):
     x = Dense(dense_dim)(D_in)
     x = Activation('sigmoid')(x)
     D_out = Dense(2, activation='sigmoid')(x)
@@ -39,7 +39,7 @@ def set_trainability(model, trainable=False):
     for layer in model.layers:
         layer.trainable = trainable
 
-def make_gan(GAN_in, G, D):
+def make_gan(GAN_in, C_in, G, D):
     set_trainability(D, False)
     x = G(GAN_in)
     print("Make Gan")

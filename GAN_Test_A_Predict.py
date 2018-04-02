@@ -29,9 +29,9 @@ min_max_scaler.fit(all_set)
 o_trans = min_max_scaler.transform(o)
 s_trans = min_max_scaler.transform(s_minority)
 
-input_dim = 1
+input_dim = 2
 print('Load Model')
-G_dense = 100
+G_dense = 200
 D_dense = 200
 Pre_train_epoches = 100
 Train_epoches = 300
