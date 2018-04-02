@@ -12,6 +12,8 @@ Sigma = np.array([[1, 0.5], [1.5, 3]])
 R = cholesky(Sigma)
 s = (np.dot(np.random.randn(sampleNo, 2), R) + mu)/10
 
+input_dim = 1
+
 print('Generate Fake Samples')
 Feature_samples = s
 print(Feature_samples[0])
@@ -23,7 +25,7 @@ print(Feature_samples[-1])
 #print(Fake_sample[-1])
 
 print('Generate Models')
-G_in = Input(shape=[2])
+G_in = Input(shape=[input_dim])
 G, G_out = gan.get_generative(G_in, out_dim=2)
 G.summary()
 
@@ -43,15 +45,15 @@ D_in = Input(shape=[2])
 D, D_out = gan.get_discriminative(D_in)
 D.summary()
 
-GAN_in = Input([2])
+GAN_in = Input([input_dim])
 GAN, GAN_out = gan.make_gan(GAN_in, G, D)
 GAN.summary()
 
-gan.pretrain(G, D, Feature_samples, noise_dim=2)
+gan.pretrain(G, D, Feature_samples, noise_dim=input_dim)
 
-d_loss, g_loss = gan.train(GAN, G, D, Feature_samples, noise_dim=2, verbose=True)
+d_loss, g_loss = gan.train(GAN, G, D, Feature_samples, noise_dim=input_dim, verbose=True)
 
-Noise_Input = np.random.uniform(0, 1, size=[sampleNo, 2])
+Noise_Input = np.random.uniform(0, 1, size=[sampleNo, input_dim])
 Sudo_Samples = G.predict(Noise_Input)
 
 plt.subplot(1,2,1)

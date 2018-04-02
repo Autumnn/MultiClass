@@ -1,8 +1,12 @@
-import numpy as np
-from numpy.linalg import cholesky
+from keras.layers import Input
+from keras.models import load_model
 from ipywidgets import IntProgress
-import matplotlib.pyplot as plt
+import numpy as np
+import Read_Data as RD
+import GAN as gan
+from numpy.linalg import cholesky
 from sklearn import preprocessing
+import matplotlib.pyplot as plt
 
 t=[i*np.pi/180 for i in np.arange(0, 360)]
 x=4*np.cos(t)
@@ -25,7 +29,26 @@ min_max_scaler.fit(all_set)
 o_trans = min_max_scaler.transform(o)
 s_trans = min_max_scaler.transform(s_minority)
 
+input_dim = 2
+print('Load Model')
+Pre_train_epoches = 1000
+Train_epoches = 1000
+Model_name = "Generator_Model_pretrain_" + str(Pre_train_epoches) + "_maintrain_" + str(Train_epoches) + ".h5"
+model = load_model(Model_name)
+
+print('Generate Fake Samples')
+Feature_samples = s_trans
+print(Feature_samples[0])
+print(Feature_samples[-1])
+
+Num_Create_samples = 300
+Noise_Input = np.random.uniform(0, 1, size=[Num_Create_samples, input_dim])
+Sudo_Samples = model.predict(Noise_Input)
+
+
 plt.plot(o_trans[:,0],o_trans[:,1])
 plt.scatter(s_trans[:,0], s_trans[:,1], marker = '+', color = 'r', label='2', s = 3)
+plt.scatter(Sudo_Samples[:,0], Sudo_Samples[:,1],marker = 'o', color = '#539caf', label='1', s = 3, alpha=0.3)
 plt.show()
+
 

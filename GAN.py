@@ -82,10 +82,10 @@ def sample_data_and_gen(G, samples, noise_dim = 6):
     y[size[0]:, 0] = 1
     return X, y
 
-def pretrain(G, D, samples, noise_dim = 6, batch_size=64):
+def pretrain(G, D, samples, noise_dim = 6, batch_size=64, epoches = 1000):
     X, y = sample_data_and_gen(G, samples, noise_dim=noise_dim)
     set_trainability(D, True)
-    D.fit(X, y, epochs=3000, batch_size=batch_size)
+    D.fit(X, y, epochs=epoches, batch_size=batch_size)
 
 def sample_noise(G, samples, noise_dim=6):
     size = list(samples.shape)
@@ -95,7 +95,7 @@ def sample_noise(G, samples, noise_dim=6):
     return X, y
 
 
-def train(GAN, G, D, samples, epochs=3000, noise_dim=6, batch_size=64, verbose=False, v_freq=50):
+def train(GAN, G, D, samples, epochs=1000, noise_dim=6, batch_size=64, verbose=False, v_freq=50):
     d_loss = []
     g_loss = []
     e_range = range(epochs)
@@ -112,3 +112,4 @@ def train(GAN, G, D, samples, epochs=3000, noise_dim=6, batch_size=64, verbose=F
         if verbose and (epoch + 1) % v_freq == 0:
             print("Epoch #{}: Generative Loss: {}, Discriminative Loss: {}".format(epoch + 1, g_loss[-1], d_loss[-1]))
     return d_loss, g_loss
+
