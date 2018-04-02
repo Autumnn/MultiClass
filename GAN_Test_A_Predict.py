@@ -21,7 +21,7 @@ mu_minority = np.array([[9, 3]])
 Sigma_minority = np.array([[1, 1.5], [0.5, 3]])
 R = cholesky(Sigma_minority)
 print(R)
-s_minority = np.dot(np.random.randn(sampleNo_minority, 2), R*0.5) + mu_minority
+s_minority = np.dot(np.random.randn(sampleNo_minority, 2), R*0.4) + mu_minority
 
 min_max_scaler = preprocessing.MinMaxScaler()
 all_set = np.concatenate((o, s_minority))
@@ -29,11 +29,13 @@ min_max_scaler.fit(all_set)
 o_trans = min_max_scaler.transform(o)
 s_trans = min_max_scaler.transform(s_minority)
 
-input_dim = 2
+input_dim = 1
 print('Load Model')
-Pre_train_epoches = 1000
-Train_epoches = 1000
-Model_name = "Generator_Model_pretrain_" + str(Pre_train_epoches) + "_maintrain_" + str(Train_epoches) + ".h5"
+G_dense = 100
+D_dense = 200
+Pre_train_epoches = 100
+Train_epoches = 300
+Model_name = "G_Model_G-dense_" + str(G_dense) + "_pretrain_" + str(Pre_train_epoches) + "_D-dense_" + str(D_dense) + "_maintrain_" + str(Train_epoches) + ".h5"
 model = load_model(Model_name)
 
 print('Generate Fake Samples')
