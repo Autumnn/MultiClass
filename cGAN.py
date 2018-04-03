@@ -1,5 +1,5 @@
 from keras import optimizers
-from keras.layers import Input, Dense, Activation
+from keras.layers import Input, Dense, Activation, concatenate
 from keras.models import Sequential, Model
 from keras.optimizers import Adam, SGD
 from tqdm import tqdm_notebook as tqdm
@@ -7,11 +7,13 @@ from ipywidgets import IntProgress
 import numpy as np
 
 def get_generative(G_in, C_in, dense_dim=300, out_dim=10, lr=1e-3):
-    x = Dense(dense_dim)(G_in)
+    x = concatenate([G_in, C_in])
+    x = Dense(dense_dim)(x)
     x = Activation('tanh')(x)
     G_out = Dense(out_dim, activation='tanh')(x)
-    G = Model(G_in, G_out)
-    opt = SGD(lr=lr)
+    G = Model([G_in, C_in], G_out)
+#    opt = SGD(lr=lr)
+    opt = Adam(lr=lr)
     G.compile(loss='binary_crossentropy', optimizer=opt)
 #    G.compile(loss='mean_squared_error', optimizer=opt)
     return G, G_out
@@ -21,10 +23,11 @@ def get_generative(G_in, C_in, dense_dim=300, out_dim=10, lr=1e-3):
 #G.summary()
 
 def get_discriminative(D_in, C_in, dense_dim = 200, lr=1e-3):
-    x = Dense(dense_dim)(D_in)
+    x = concatenate([D_in, C_in])
+    x = Dense(dense_dim)(x)
     x = Activation('sigmoid')(x)
     D_out = Dense(2, activation='sigmoid')(x)
-    D = Model(D_in, D_out)
+    D = Model([D_in, C_in], D_out)
     dopt = Adam(lr=lr)
     D.compile(loss='binary_crossentropy', optimizer=dopt)
     return D, D_out
@@ -41,11 +44,9 @@ def set_trainability(model, trainable=False):
 
 def make_gan(GAN_in, C_in, G, D):
     set_trainability(D, False)
-    x = G(GAN_in)
-    print("Make Gan")
-    print(x)
-    GAN_out = D(x)
-    GAN = Model(GAN_in, GAN_out)
+    x = G([GAN_in, C_in])
+    GAN_out = D([x, C_in])
+    GAN = Model([GAN_in, C_in], GAN_out)
 #    GAN.compile(loss='mean_squared_error', optimizer=G.optimizer)
     GAN.compile(loss='binary_crossentropy', optimizer=G.optimizer)
     return GAN, GAN_out
@@ -67,7 +68,7 @@ def sample_data(samples):   # ACtually no use, just for test --> it can generate
         Fake_Sample[:,i] = Fake_Sample[:,i] * Dis + Min
     return Fake_Sample
 
-def sample_data_and_gen(G, samples, noise_dim = 6):
+def sample_data_and_gen(G, C, samples, noise_dim = 6):
     #XT = sample_data(samples)
     XT = samples
     size = list(samples.shape)
@@ -75,7 +76,7 @@ def sample_data_and_gen(G, samples, noise_dim = 6):
     #print("XN_noise:")
     #print(XN_noise[0])
     #print(XN_noise[-1])
-    XN = G.predict(XN_noise)
+    XN = G.predict([XN_noise, C])
     #print("XN:")
     #print(XN[0])
     #print(XN[-1])
@@ -85,10 +86,11 @@ def sample_data_and_gen(G, samples, noise_dim = 6):
     y[size[0]:, 0] = 1
     return X, y
 
-def pretrain(G, D, samples, noise_dim = 6, batch_size=64, epoches = 1000):
-    X, y = sample_data_and_gen(G, samples, noise_dim=noise_dim)
+def pretrain(G, D, C_samples, samples, noise_dim = 6, batch_size=64, epoches = 1000):
+    X, y = sample_data_and_gen(G, C_samples, samples, noise_dim=noise_dim)
     set_trainability(D, True)
-    D.fit(X, y, epochs=epoches, batch_size=batch_size)
+    cc = np.concatenate((C_samples, C_samples))
+    D.fit([X, cc], y, epochs=epoches, batch_size=batch_size)
 
 def sample_noise(G, samples, noise_dim=6):
     size = list(samples.shape)
@@ -98,20 +100,21 @@ def sample_noise(G, samples, noise_dim=6):
     return X, y
 
 
-def train(GAN, G, D, samples, epochs=1000, noise_dim=6, batch_size=64, verbose=False, v_freq=50):
+def train(GAN, G, D, C_samples, samples, epochs=1000, noise_dim=6, batch_size=64, verbose=False, v_freq=50):
     d_loss = []
     g_loss = []
     e_range = range(epochs)
     if verbose:
         e_range = tqdm(e_range)
     for epoch in e_range:
-        X, y = sample_data_and_gen(G, samples, noise_dim=noise_dim)
+        X, y = sample_data_and_gen(G, C_samples, samples, noise_dim=noise_dim)
         set_trainability(D, True)
-        d_loss.append(D.train_on_batch(X, y))
+        cc = np.concatenate((C_samples, C_samples))
+        d_loss.append(D.train_on_batch([X, cc], y))
 
         X, y = sample_noise(G, samples, noise_dim=noise_dim)
         set_trainability(D, False)
-        g_loss.append(GAN.train_on_batch(X, y))
+        g_loss.append(GAN.train_on_batch([X, C_samples], y))
         if verbose and (epoch + 1) % v_freq == 0:
             print("Epoch #{}: Generative Loss: {}, Discriminative Loss: {}".format(epoch + 1, g_loss[-1], d_loss[-1]))
     return d_loss, g_loss
