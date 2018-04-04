@@ -1,11 +1,11 @@
 import math
 import numpy as np
-from sklearn import svm
+from sklearn import svm, preprocessing
 import Read_Data as RD
 from matplotlib import pyplot as plt
 
 Num_Cross_Folders = 5
-Gamma = np.arange(0.2, 0.25, 0.05)
+Gamma = np.arange(0.01, 0.11, 0.01)
 G_Mean = np.linspace(0, 0, len(Gamma))
 Sensitivity = np.linspace(0, 0, len(Gamma))
 Specificity = np.linspace(0, 0, len(Gamma))
@@ -18,23 +18,31 @@ for g in range(len(Gamma)):
     for j in range(Num_Cross_Folders):
 #        dir_train = "glass1-5-fold/glass1-5-" + str(j+1) + "tra.dat"
 #        dir_test = "glass1-5-fold/glass1-5-" + str(j+1) + "tst.dat"
-        dir_train = "page-blocks0-5-fold/page-blocks0-5-" + str(j + 1) + "tra.dat"
-        dir_test = "page-blocks0-5-fold/page-blocks0-5-" + str(j + 1) + "tst.dat"
+#        dir_train = "segment0-5-fold/segment0-5-" + str(j + 1) + "tra.dat"
+#        dir_test = "segment0-5-fold/segment0-5-" + str(j + 1) + "tst.dat"
+        dir_train = "yeast4-5-fold/yeast4-5-" + str(j + 1) + "tra.dat"
+        dir_test = "yeast4-5-fold/yeast4-5-" + str(j + 1) + "tst.dat"
 
         RD.Initialize_Data(dir_train)
-        Train_Feature = RD.get_feature()
+        Train_Feature_o = RD.get_feature()
         Train_Label = RD.get_label()
         Train_Label = Train_Label.ravel()
 
+        RD.Initialize_Data(dir_test)
+        Test_Feature_o = RD.get_feature()
+        Test_Label = RD.get_label()
+        Test_Label = Test_Label.ravel()
+
+        min_max_scaler = preprocessing.MinMaxScaler()
+        all_set = np.concatenate((Train_Feature_o, Test_Feature_o))
+        min_max_scaler.fit(all_set)
+        Train_Feature = min_max_scaler.transform(Train_Feature_o)
+        Test_Feature = min_max_scaler.transform(Test_Feature_o)
+
         clf = svm.SVC(C=1, kernel='rbf', gamma=Gamma[g])
         clf.fit(Train_Feature, Train_Label)
-
-        RD.Initialize_Data(dir_test)
-        Test_Feature = RD.get_feature()
-        Test_Label = RD.get_label()
-
-        Test_Label = Test_Label.ravel()
         Labels_Predict = clf.predict(Test_Feature)
+
 #        print(np.array([Test_Label, Labels_Predict]))
         TP = 0.0
         FP = 0.0
@@ -53,7 +61,7 @@ for g in range(len(Gamma)):
                 else:
                     FN += 1
 
-#        print('TP=', TP, 'FN', FN, 'FP', FP, 'TN', TN)
+        print('TP=', TP, 'FN', FN, 'FP', FP, 'TN', TN)
         G_Mean_Temp[j] = math.sqrt((TP / (TP + FN)) * (TN / (TN + FP)))
         Sensitivity_Temp[j] = TP / (TP + FN)
         Specificity_Temp[j] = TN / (TN + FP)
@@ -63,7 +71,7 @@ for g in range(len(Gamma)):
     Sensitivity[g] = Sensitivity_Temp.mean()
     Specificity[g] = Specificity_Temp.mean()
     if Gamma[g] == 0.2:
-        FileWrite = "page-blocks0-5-fold/OverSampling_Test_GAN_with_or_without_SVM.txt"
+        FileWrite = "segment0-5-fold/OverSampling_Test_with_or_without_SVM.txt"
         with open(FileWrite, 'a') as w:
             w.write("G_Mean: " + str(G_Mean_Temp) + "\n")
             w.write("Sensitivity: " + str(Sensitivity_Temp) + "\n")
@@ -71,7 +79,7 @@ for g in range(len(Gamma)):
 #    print("Gamma = ", Gamma[g], ", Average_G_Mean = ", G_Mean[g],
 #          ", Average_Sensitivity = ", Sensitivity[g], ", Average_Specificity = ", Specificity[g])
 
-#print("G_Mean", G_Mean)
+print("G_Mean", G_Mean)
 #print("Sensitivity", Sensitivity)
 #print("Specificity", Specificity)
 

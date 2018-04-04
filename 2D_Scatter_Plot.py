@@ -10,8 +10,8 @@ RD.Initialize_Data(dir)
 
 
 
-for i in range(16, 19):
-    for j in range(16, 19):
+for i in range(0, 19):
+    for j in range(i+1, 19):
         if i != j:
             fig = plt.figure()
             p1 = plt.scatter(RD.Negative_Feature[:,i], RD.Negative_Feature[:,j], marker = 'o', color = '#539caf', label='1', s = 10, alpha=0.3)

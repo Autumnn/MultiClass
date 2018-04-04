@@ -1,98 +1,44 @@
 import os
 import math
 import numpy as np
-from sklearn import svm
+from sklearn import svm, preprocessing
+import Read_Data as RD
 
-G_Mean = np.array([0.0,0.0,0.0,0.0,0.0])
-for j in range(5):
-    dir_train = "page-blocks0-5-fold/page-blocks0-5-" + str(j+1) + "tra.dat"
-    dir_test = "page-blocks0-5-fold/page-blocks0-5-" + str(j+1) + "tst.dat"
+Num_Cross_Folders = 5
+G_Mean = np.linspace(0, 0, Num_Cross_Folders)
+for j in range(Num_Cross_Folders):
+    dir_train = "segment0-5-fold/segment0-5-" + str(j+1) + "tra.dat"
+    dir_test = "segment0-5-fold/segment0-5-" + str(j+1) + "tst.dat"
     #dir_train = "glass1/result" + str(j) + "s0.tra"
     #dir_test = "glass1/result" + str(j) + "s0.tst"
 
-    Num_lines = len(open(dir_train,'r').readlines())
-    Num_Samples = Num_lines-14
-    print(Num_Samples)
+    RD.Initialize_Data(dir_train)
+    Train_Feature_o = RD.get_feature()
+    Train_Label = RD.get_label()
+    Train_Label = Train_Label.ravel()
 
-    Features = np.ones((Num_Samples,9))
-    Labels = np.ones((Num_Samples,1))
+    RD.Initialize_Data(dir_test)
+    Test_Feature_o = RD.get_feature()
+    Test_Label = RD.get_label()
+    Test_Label = Test_Label.ravel()
 
-    with open(dir_train, "r") as data_file:
-        print("name", data_file.name)
-        l = 0
-        for line in data_file:
-            l += 1
-            if l >= 15:
-                #print(line)
-                row = line.split(",")
-                length_row = len(row)
-                #print('Row length',length_row)
-                #print(row[0])
-                for i in range(length_row):
-                    if i < length_row - 1:
-                        Features[l-15][i] = row[i]
-                        #print(Features[l-14][i])
-                    else:
-                        attri = row[i].strip()
-                        #print(attri)
-                        if attri == 'negative':
-                            Labels[l-15][0]=0
-                            #print(Labels[l-14][0])
-                        else:
-                            Labels[l-15][0]=1
+    min_max_scaler = preprocessing.MinMaxScaler()
+    all_set = np.concatenate((Train_Feature_o, Test_Feature_o))
+    min_max_scaler.fit(all_set)
+    Train_Feature = min_max_scaler.transform(Train_Feature_o)
+    Test_Feature = min_max_scaler.transform(Test_Feature_o)
 
-    #print(Features)
-    Labels = Labels.ravel()
-    #print(Labels)
+    clf = svm.SVC(C=1, kernel='rbf', gamma=0.2)
+    clf.fit(Train_Feature, Train_Label)
+    Labels_Predict = clf.predict(Test_Feature)
 
-    clf = svm.SVC(C=1, kernel='rbf', gamma= 0.2)
-    clf.fit(Features, Labels)
-
-    #SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0,decision_function_shape='ovr',degree=3,
-    #    gamma='auto', kernel='rbf',max_iter=-1, probability=False, random_state=None,
-    #    shrinking=True,tol=0.001, verbose=False)
-
-    Num_lines_Test = len(open(dir_test,'r').readlines())
-    Num_Samples_Test = Num_lines_Test-14
-    print(Num_Samples_Test)
-
-    Features_Test = np.ones((Num_Samples_Test,9))
-    Labels_Test = np.ones((Num_Samples_Test,1))
-
-    with open(dir_test, "r") as data_file_Test:
-        print("name", data_file_Test.name)
-        l = 0
-        for line in data_file_Test:
-            l += 1
-            if l >= 15:
-                #print(line)
-                row = line.split(",")
-                length_row = len(row)
-                #print('Row length',length_row)
-                #print(row[0])
-                for i in range(length_row):
-                    if i < length_row - 1:
-                        Features_Test[l-15][i] = row[i]
-                        #print(Features[l-14][i])
-                    else:
-                        attri = row[i].strip()
-                        #print(attri)
-                        if attri == 'negative':
-                            Labels_Test[l-15][0]=0
-                            #print(Labels[l-14][0])
-                        else:
-                            Labels_Test[l-15][0]=1
-
-    Labels_Test = Labels_Test.ravel()
-    Labels_Predict = clf.predict(Features_Test)
-    print(np.array([Labels_Test,Labels_Predict]))
     TP = 0.0
     FP = 0.0
     FN = 0.0
     TN = 0.0
-    l = len(Labels_Test)
+    l = len(Test_Label)
     for i in range(l):
-        if Labels_Test[i] == 0:
+        if Test_Label[i] == 0:
             if Labels_Predict[i] == 0:
                 TN += 1
             else:
