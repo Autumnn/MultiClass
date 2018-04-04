@@ -12,8 +12,8 @@ def get_generative(G_in, C_in, dense_dim=300, out_dim=10, lr=1e-3):
     x = Activation('tanh')(x)
     G_out = Dense(out_dim, activation='tanh')(x)
     G = Model([G_in, C_in], G_out)
-#    opt = SGD(lr=lr)
-    opt = Adam(lr=lr)
+    opt = SGD(lr=lr)
+#    opt = Adam(lr=lr)
     G.compile(loss='binary_crossentropy', optimizer=opt)
 #    G.compile(loss='mean_squared_error', optimizer=opt)
     return G, G_out

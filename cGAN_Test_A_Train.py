@@ -39,7 +39,7 @@ for k_n in range(sampleNo_minority):
             condition_samples[k_n,:] = o_trans[k_o,:]
 
 d_write = np.hstack((s_minority, condition_samples))
-FileWrite = "Generated_samples.npy"
+FileWrite = "Generated_samples_A.npy"
 np.save(FileWrite, d_write)
 
 input_dim = 2
@@ -64,10 +64,10 @@ GAN, GAN_out = gan.make_gan(GAN_in, C_in, G, D)
 GAN.summary()
 
 Pre_train_epoches = 100
-Train_epoches = 10000
+Train_epoches = 500
 gan.pretrain(G, D, condition_samples,Feature_samples, noise_dim=input_dim, epoches=Pre_train_epoches)
 d_loss, g_loss = gan.train(GAN, G, D, condition_samples,Feature_samples, epochs= Train_epoches , noise_dim=input_dim, verbose=True)
-Model_name = "cGAN_G-dense_" + str(G_dense) + "_pretrain_" + str(Pre_train_epoches) + "_D-dense_" + str(D_dense) + "_maintrain_" + str(Train_epoches) + ".h5"
+Model_name = "cGAN_A_G-dense_" + str(G_dense) + "_pretrain_" + str(Pre_train_epoches) + "_D-dense_" + str(D_dense) + "_maintrain_" + str(Train_epoches) + ".h5"
 G.save(Model_name)
 
 

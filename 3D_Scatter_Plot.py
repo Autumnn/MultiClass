@@ -5,12 +5,12 @@ import numpy as np
 import Read_Data as RD
 
 #dir = "wine-5-fold/wine-5-1tra.dat"
-dir = "segment0.dat"
+dir = "yeast4.dat"
 
 RD.Initialize_Data(dir)
 
-Features_Attribute = [0, 13 , 14, 15, 16, 17, 18]
-#Features_Attribute = np.arange(0, RD.Num_Features, 1)
+#Features_Attribute = [0, 13 , 14, 15, 16, 17, 18]
+Features_Attribute = np.arange(0, RD.Num_Features, 1)
 
 l = len(Features_Attribute)
 
